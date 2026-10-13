@@ -1,6 +1,6 @@
 ---
 name: check-after-deploy
-description: "Check production health after a deployment, scoped to the change shipped in this session."
+description: "Check production health after a deployment, scoped to the change shipped in this session. To decide whether a rolled-out ticket can be closed, use prod-acceptance."
 ---
 
 # Check After Deploy

@@ -1,19 +1,19 @@
 ---
 name: prod-acceptance
-description: "Accept a shipped ticket on production: prove with before/after numbers that the change works for real users, find regressions and unfinished parts, then report and post the verdict to the ticket."
+description: "Decide whether a ticket rolled out to production can be closed: before/after numbers on equal windows, live-object traces and a verdict posted to the ticket. For a post-deploy health check of a change shipped in this session, use check-after-deploy."
 ---
 
 # Production Acceptance
 
 A ticket's change has been rolled out to production, and the user wants to know whether it can be closed. Answer three questions with numbers from the source of truth: when exactly it went live, whether it does what it was meant to do for real users, and what it broke or left undone. Then report, and with the user's approval post the verdict to the ticket.
 
-This is narrower than a general health check and stricter than one. A health check asks whether anything caught fire; acceptance asks whether *this* change works, and "nothing caught fire" is not an answer to that.
+`check-after-deploy` covers the shared ground: scoping the check to the diff, confirming the change works rather than only that nothing broke, checking its switches are really set, treating a path with no traffic as a finding, and telling a regression from the background. Read it and apply it here; this skill adds what closing a ticket needs on top — usually days after the rollout, in a session that didn't ship it: the rollout moment from a hard marker, equal-shape windows with denominators, traces through live objects, the verdict on the ticket and a memory note the next check starts from.
 
 The steps below are the method. Where things are in a given project (console access, rollout markers, data pitfalls, how to post to the tracker) comes from the repository's and the user's own instructions and memory; load the relevant parts before the first query.
 
 ## Start from what shipped, not from the ticket
 
-First look for an earlier verification of the same ticket in memory. If there is one, start from its conclusions and its list of paths not yet seen live, and spend the session on those rather than recomputing what is already settled.
+First look for an earlier verification of the same ticket in memory. Reuse its **how to count** — indexes, filters, traps — and its list of paths not yet seen live, but not its verdict as settled: the note describes production on the day it was written. Before relying on its conclusions, check what has changed on the same mechanics since that date — MRs carrying the ticket, reverts, flag flips, config overrides — and re-measure anything that moved.
 
 Then read the ticket (acceptance criteria, comments) and every MR that carried it — tasks often ship as several MRs across services plus follow-up fixes. **Verify what the code changed, not what the ticket says.** The diff and the MR description (risks, out of scope, follow-ups) define the mechanics you are looking for. Where the ticket asked for something the MRs deliberately didn't do, that is its own item in the report, not a failure of the change.
 
@@ -33,7 +33,7 @@ The merge date is not the rollout, and neither is a master pipeline. Use the har
 
 The last case of the old behaviour and the first case of the new one bracket it well. The earliest `created_at` among rows carrying the new marker does not: work started before the deploy finishes after it and drags the apparent moment back by days.
 
-Check, too, that the rollout switched anything on. A change can ship dormant behind a flag, a per-account mapping, a rule, or a production config override that differs from the repo. Read the live values before assuming the feature is active.
+Check, as `check-after-deploy` does with its switches, that the rollout switched anything on — a per-account mapping, a rule or a production config override that differs from the repo can keep the change dormant.
 
 ## Measure before against after
 
@@ -47,7 +47,7 @@ Fresh windows contain objects that haven't finished: orders and payments still w
 
 Aggregates aren't enough. Pick **two to five concrete objects** that went through the new branch and follow each through its full chain: status transitions, comments, event log, provider data, the analytics mirror. Pick one more object on the opposite branch, where the change must correctly *not* fire, and check that it didn't.
 
-When the new branch hasn't run live yet — the triggering event simply hasn't happened since the rollout — that is a finding, not a pass. State it as "path X not seen live: 0 cases in N days against a background of M", and where you can, exercise the logic in memory on an old object without writing anything.
+When the new branch hasn't run live yet — the triggering event simply hasn't happened since the rollout — record it as "path X not seen live: 0 cases in N days against a background of M". You may feed a loaded old record to a pure function — a predicate, a mapper, a rule or decision object — to show what it would decide. Don't exercise anything on production that may enqueue a job, publish an event, call a provider or send a notification; that branch stays *not seen live* in the report.
 
 ## Sort what you find
 
@@ -62,7 +62,7 @@ Before naming a cause, walk the code from the entry point (the action, webhook o
 
 ## Stay read-only
 
-Everything here reads. Run production console scripts inside a read-only transaction, set session parameters only with `SET LOCAL` inside it, and never with a plain `SET` through a pooled connection, where it outlives your session and reaches the application. Print after every step with its own rescue, so one failure doesn't swallow the output of the steps before it, and check column and table names against the code first — errors from production consoles land in the error tracker. Writes, backfills and setting changes go to the user as a command to run themselves. Never print secrets.
+Everything here reads. A read-only transaction stops SQL writes and nothing else: a job enqueue, an event publish, an outbound HTTP call or an alert still fires from inside it, so on a production console call only code you know has none of these. Run console scripts inside a read-only transaction, set session parameters only with `SET LOCAL` inside it, and never with a plain `SET` through a pooled connection, where it outlives your session and reaches the application. Print after every step with its own rescue, so one failure doesn't swallow the output of the steps before it, and check column and table names against the code first — errors from production consoles land in the error tracker. Writes, backfills and setting changes go to the user as a command to run themselves. Never print secrets.
 
 ## The report
 
@@ -74,7 +74,7 @@ Lead with the verdict — works, works partially, or doesn't — and the rollout
 - **Not seen live** — which branches, and why.
 - **Leftovers** — incomplete parts, follow-ups, manual clean-up.
 
-Don't pad it with what came back clean, but do name what you couldn't check: an unchecked surface silently reads as a healthy one.
+Don't pad it with what came back clean, but name what you couldn't check, as `check-after-deploy` asks.
 
 Post the verdict to the ticket **only after the user approves the text**. Propose follow-up tickets as text and create them only when asked; leave status transitions to the user.
 
