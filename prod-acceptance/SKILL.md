@@ -1,11 +1,11 @@
 ---
 name: prod-acceptance
-description: "Decide whether a ticket rolled out to production can be closed: before/after numbers on equal windows, live-object traces and a verdict posted to the ticket. For a post-deploy health check of a change shipped in this session, use check-after-deploy."
+description: "Decide whether a ticket rolled out to production can be closed: before/after numbers on equal windows, live-object traces, a verdict posted to the ticket, and the ticket resolved, split off into a follow-up, or rejected back to its assignee. For a post-deploy health check of a change shipped in this session, use check-after-deploy."
 ---
 
 # Production Acceptance
 
-A ticket's change has been rolled out to production, and the user wants to know whether it can be closed. Answer three questions with numbers from the source of truth: when exactly it went live, whether it does what it was meant to do for real users, and what it broke or left undone. Then report, and with the user's approval post the verdict to the ticket.
+A ticket's change has been rolled out to production, and the user wants to know whether it can be closed. Answer three questions with numbers from the source of truth: when exactly it went live, whether it does what it was meant to do for real users, and what it broke or left undone. Then report, and with the user's approval post the verdict to the ticket and move it to the outcome below.
 
 `check-after-deploy` covers the shared ground: scoping the check to the diff, confirming the change works rather than only that nothing broke, checking its switches are really set, treating a path with no traffic as a finding, and telling a regression from the background. Read it and apply it here; this skill adds what closing a ticket needs on top — usually days after the rollout, in a session that didn't ship it: the rollout moment from a hard marker, equal-shape windows with denominators, traces through live objects, the verdict on the ticket and a memory note the next check starts from.
 
@@ -76,6 +76,18 @@ Lead with the verdict — works, works partially, or doesn't — and the rollout
 
 Don't pad it with what came back clean, but name what you couldn't check, as `check-after-deploy` asks.
 
-Post the verdict to the ticket **only after the user approves the text**. Propose follow-up tickets as text and create them only when asked; leave status transitions to the user.
+## Close the ticket out
 
-Finally, save the verification to memory: the date, the rollout moment and how it was found, the key numbers, what isn't seen live yet, where the leftovers went, and **how to count** — indexes, filters, traps — so the next check of the same ticket starts there instead of from zero. A new pitfall that applies beyond this ticket goes where the project's general notes live, not into the ticket's note.
+The findings decide one of three outcomes:
+
+- **Done** — the change works and nothing is left within the ticket's scope. Resolve the ticket.
+- **Done, with a follow-up** — the ticket's own scope works, but you found something outside it: a gap the ticket never asked for, a neighbouring path with the same flaw, a pre-existing problem the check surfaced. Resolve the ticket and open a new one for the follow-up, linked to it, so the follow-up doesn't keep a finished ticket open.
+- **Rejected** — a regression the change caused, or an incomplete fix of what the ticket asked for. Move the ticket to the rejected-by-testing status (`Rejected by testing` where the tracker has it) and assign it back to whoever implemented it, with the comment saying what to fix.
+
+Scope is the dividing line, so judge it against the ticket's acceptance criteria and the MRs, not against what would be nice: a gap in the mechanics the ticket was about rejects it, while anything beyond them is a follow-up. Pre-existing and unrelated findings never reject a ticket. A path not seen live doesn't reject it either — it goes into the comment as unverified, and into a follow-up when there is something to do about it.
+
+Show the user the comment, the outcome, and any follow-up ticket's text together, and act **only after they approve**: post the comment, create and link the follow-up, then make the transition and the assignment. Read the ticket back afterwards to confirm the status and the assignee took.
+
+## Remember it
+
+Save the verification to memory: the date, the rollout moment and how it was found, the key numbers, the outcome and any follow-up ticket, what isn't seen live yet, where the leftovers went, and **how to count** — indexes, filters, traps — so the next check of the same ticket starts there instead of from zero. A new pitfall that applies beyond this ticket goes where the project's general notes live, not into the ticket's note.
