@@ -1,6 +1,6 @@
 ---
 name: prod-acceptance
-description: "Decide whether a ticket rolled out to production can be closed: before/after numbers on equal windows, live-object traces, a verdict posted to the ticket, and the ticket resolved, split off into a follow-up, or rejected back to its assignee. For a post-deploy health check of a change shipped in this session, use check-after-deploy."
+description: "Decide whether a ticket rolled out to production can be closed: before/after numbers on equal windows, live-object traces, a verdict posted to the ticket, and the ticket resolved, resolved with a follow-up, rejected back to its implementer, or left open while the change hasn't run live. For a post-deploy health check of a change shipped in this session, use check-after-deploy."
 ---
 
 # Production Acceptance
