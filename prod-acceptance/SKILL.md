@@ -82,11 +82,13 @@ The findings decide one of three outcomes:
 
 - **Done** — the change works and nothing is left within the ticket's scope. Resolve the ticket.
 - **Done, with a follow-up** — the ticket's own scope works, but you found something outside it: a gap the ticket never asked for, a neighbouring path with the same flaw, a pre-existing problem the check surfaced. Resolve the ticket and open a new one for the follow-up, linked to it, so the follow-up doesn't keep a finished ticket open.
-- **Rejected** — a regression the change caused, or an incomplete fix of what the ticket asked for. Move the ticket to the rejected-by-testing status (`Rejected by testing` where the tracker has it) and assign it back to whoever implemented it, with the comment saying what to fix.
+- **Rejected** — a regression the change caused, or an incomplete fix of what the ticket asked for. Move the ticket to the rejected-by-testing status (`Rejected by testing` where the tracker has it) and assign it back to whoever implemented it, with the comment saying what to fix. The implementer is the author of the MR whose part fell short, not the ticket's current assignee, who by now is often the tester; when that is ambiguous — several authors on the failing part, or none of them maps to a tracker user — put the candidates in front of the user with the rest of the outcome rather than picking one.
 
-Scope is the dividing line, so judge it against the ticket's acceptance criteria and the MRs, not against what would be nice: a gap in the mechanics the ticket was about rejects it, while anything beyond them is a follow-up. Pre-existing and unrelated findings never reject a ticket. A path not seen live doesn't reject it either — it goes into the comment as unverified, and into a follow-up when there is something to do about it.
+Scope is the dividing line, so judge it against the ticket's acceptance criteria and the MRs, not against what would be nice: a gap in the mechanics the ticket was about rejects it, while anything beyond them is a follow-up. Pre-existing and unrelated findings never reject a ticket. A side branch not seen live doesn't reject it either — it goes into the comment as unverified, and into a follow-up when there is something to do about it.
 
-Show the user the comment, the outcome, and any follow-up ticket's text together, and act **only after they approve**: post the comment, create and link the follow-up, then make the transition and the assignment. Read the ticket back afterwards to confirm the status and the assignee took.
+When the ticket's main mechanics haven't run live at all, there is no verdict yet, and none of the three outcomes applies: resolving would close a ticket nobody has seen working. Leave the ticket where it is, say in the comment what hasn't fired and when it is worth checking again, and offer the user that re-check.
+
+Show the user the comment, the outcome, and any follow-up ticket's text together, and act **only after they approve**: create and link the follow-up first, so the comment can name its key, then post the comment, then make the transition and the assignment. Read the ticket back afterwards to confirm the status and the assignee took.
 
 ## Remember it
 
